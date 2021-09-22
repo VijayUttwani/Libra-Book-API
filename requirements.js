@@ -21,11 +21,11 @@
 // List of books on languages ✅
 
 // POST
-// Add new book
+// Add new book ✅
 
 // PUT
-// Update book title
-// Update/add new author
+// Update book title ✅
+// Update/add new author ✅
 
 // DELETE
 // Delete a book
@@ -40,10 +40,10 @@
 // List of authors based on books ✅
 
 // POST
-// Add new author
+// Add new author ✅
 
 // PUT
-// Update author name
+// Update author name ✅
 
 // DELETE
 // Delete an author
@@ -57,10 +57,10 @@
 // List of Publications based on books ✅
 
 // POST
-// Add new publications
+// Add new publications ✅
 
 // PUT
-// Update the publication name
+// Update the publication name ✅
 // Update/add books to publications
 
 // DELETE

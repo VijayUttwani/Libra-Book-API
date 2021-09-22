@@ -6,6 +6,9 @@ const database = require("./database");
 // Initialization
 const Libra = express();
 
+// Configuration
+Libra.use(express.json());
+
 /*
 Route           /          
 Description     Get all books     
@@ -22,7 +25,7 @@ Libra.get("/", (req, res) => {
 Route           /is          
 Description     Get specific books by ISBN  
 Access          PUBLIC        
-Parameter       NONE
+Parameter       isbn
 Method          GET  
 */
 
@@ -119,7 +122,7 @@ Libra.get("/author/n/:name", (req, res) => {
 });
 
 /*
-Route           /author/book/:isbn     
+Route           /author/book    
 Description     Get all authors by books  
 Access          PUBLIC        
 Parameter       isbn
@@ -175,10 +178,10 @@ Libra.get("/p/:name", (req, res) => {
 });
 
 /*
-Route           /p         
+Route           /publication/book       
 Description     Get publication by book
 Access          PUBLIC        
-Parameter       name
+Parameter       isbn
 Method          includes 
 */
 
@@ -199,13 +202,160 @@ Libra.get("/publication/book/:isbn", (req, res) => {
 Route           /book/new        
 Description     Add new book
 Access          PUBLIC        
-Parameter       name
+Parameter       none
 Method          POST
 */
 
 Libra.post("/book/new", (req, res) => {
+	console.log(req.body);
 	const { newBook } = req.body;
-	
+	database.books.push(newBook);
+	return res.json({ books: database.books });
+});
+
+/*
+Route           /author/new        
+Description     Add new auhtor to a book
+Access          PUBLIC        
+Parameter       none
+Method          POST
+*/
+
+Libra.post("/author/new", (req, res) => {
+	console.log(req.body);
+	const { newAuthor } = req.body;
+	database.authors.push(newAuthor);
+	return res.json({ authors: database.authors });
+});
+
+/*
+Route           /publication/new        
+Description     Add new auhtor to a book
+Access          PUBLIC        
+Parameter       none
+Method          POST
+*/
+
+Libra.post("/publication/new", (req, res) => {
+	console.log(req.body);
+	const { newPublication } = req.body;
+	database.publications.push(newPublication);
+	return res.json({ publications: database.publications });
+});
+
+/*
+Route           /book/update/title        
+Description     Update book title 
+Access          PUBLIC        
+Parameter       isbn
+Method          PUT
+*/
+
+Libra.put("/book/update/title/:isbn", (req, res) => {
+	database.books.forEach((books) => {
+		if (books.ISBN === req.params.isbn) {
+			books.title = req.body.newBookTitle;
+			return;
+		}
+	});
+
+	return res.json({ books: database.books });
+});
+
+/*
+Route           /book/update/author       
+Description     Update book author
+Access          PUBLIC        
+Parameter       isbn, authorId
+Method          PUT, push
+*/
+
+Libra.put("/book/update/author/:isbn/:authorId", (req, res) => {
+	//update book database
+	database.books.forEach((books) => {
+		if (books.ISBN === req.params.isbn) {
+			return books.author.push(parseInt(req.params.authorId));
+		}
+	});
+	//update author database
+	database.authors.forEach((authors) => {
+		if (authors.id === parseInt(req.params.authorId)) {
+			return authors.books.push(req.params.isbn);
+		}
+	});
+
+	return res.json({ books: database.books, authors: database.authors });
+});
+
+/*
+Route           /author/update     
+Description     Update author name 
+Access          PUBLIC        
+Parameter       id
+Method          PUT
+*/
+
+Libra.put("/author/update/:id", (req, res) => {
+	database.authors.forEach((authors) => {
+		if (authors.id === parseInt(req.params.id)) {
+			authors.name = req.body.newAuthorName;
+			return;
+		}
+	});
+
+	return res.json({ authors: database.authors });
+});
+
+/*
+Route           /publication/update        
+Description     Update publication name 
+Access          PUBLIC        
+Parameter       id
+Method          PUT
+*/
+
+Libra.put("/publication/update/:id", (req, res) => {
+	database.publications.forEach((publications) => {
+		if (publications.id === parseInt(req.params.id)) {
+			publications.name = req.body.newPublicationName;
+			return;
+		}
+	});
+
+	return res.json({ publications: database.publications });
+});
+
+/*
+Route           /publication/update/book       
+Description     Update books to publications
+Access          PUBLIC        
+Parameter       pubId, isbn
+Method          PUT, push
+*/
+
+Libra.put("/publication/update/book/:isbn", (req, res) => {
+	//update publication database
+	database.publications.forEach((publications) => {
+		if (publications.id === req.body.pubId) {
+			return publications.books.push(req.params.isbn);
+		}
+	});
+
+	//update book database
+	database.books.forEach((books) => {
+		if (books.ISBN === req.params.isbn) {
+			books.publication = req.body.pubId;
+			return;
+		}
+	});
+
+	return res.json({
+		books: database.books,
+		publications: database.publications,
+		message: "Successfully updated publication",
+	});
 });
 
 Libra.listen(3000, () => console.log("The server is running🚀"));
+
+// HTTP Client -> helper who helps you to make http request
