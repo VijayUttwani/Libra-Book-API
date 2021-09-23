@@ -327,7 +327,7 @@ Libra.put("/publication/update/:id", (req, res) => {
 
 /*
 Route           /publication/update/book       
-Description     Update books to publications
+Description     Update books in publications
 Access          PUBLIC        
 Parameter       pubId, isbn
 Method          PUT, push
@@ -354,6 +354,132 @@ Libra.put("/publication/update/book/:isbn", (req, res) => {
 		publications: database.publications,
 		message: "Successfully updated publication",
 	});
+});
+
+/*
+Route           /book/delete       
+Description     delete a book
+Access          PUBLIC        
+Parameter       isbn
+Method          DELETE
+*/
+
+Libra.delete("/book/delete/:isbn", (req, res) => {
+	const updatedBookDatabase = database.books.filter(
+		(book) => book.ISBN !== req.params.isbn
+	);
+
+	// the book that didn't match was moved to database and the matched book was deleted
+	database.books = updatedBookDatabase;
+	return res.json({ books: database.books });
+});
+
+/*
+Route           /book/delete/author     
+Description     delete an author from book
+Access          PUBLIC        
+Parameter       isbn, authorId
+Method          DELETE
+*/
+
+Libra.delete("/book/delete/author/:isbn/:authorId", (req, res) => {
+	//Update book database
+	database.books.forEach((book) => {
+		if (book.ISBN === req.params.isbn) {
+			const newAuthorList = book.author.filter(
+				(author) => author !== parseInt(req.params.authorId)
+			);
+			book.author = newAuthorList;
+			return;
+		}
+	});
+
+	//Update author database
+	database.authors.forEach((author) => {
+		if (author.id === parseInt(req.params.authorId)) {
+			const newBookList = author.books.filter(
+				(books) => books !== req.params.isbn
+			);
+			author.books = newBookList;
+			return;
+		}
+	});
+
+	return res.json({
+		books: database.books,
+		authors: database.authors,
+		message: "author was deleted⛔",
+	});
+});
+
+/*
+Route           /author/delete       
+Description     delete an autheor
+Access          PUBLIC        
+Parameter       authorId
+Method          DELETE
+*/
+
+Libra.delete("/author/delete/:authorId", (req, res) => {
+	const updatedAuthorDatabase = database.authors.filter(
+		(author) => author.id !== parseInt(req.params.authorId)
+	);
+
+	//The author that didn't match was moved to databse and the matched author was deleted
+	database.authors = updatedAuthorDatabase;
+	return res.json({ authors: database.authors });
+});
+
+/*
+Route           /publication/delete       
+Description     delete an author
+Access          PUBLIC        
+Parameter       pubId
+Method          DELETE
+*/
+
+Libra.delete("/publication/delete/:pubId", (req, res) => {
+	const updatedPublicationDatabase = database.publications.filter(
+		(publication) => publication.id !== parseInt(req.params.pubId)
+	);
+
+	database.publications = updatedPublicationDatabase;
+	return res.json({ publications: database.publications });
+});
+
+/*
+Route           /publication/delete/book      
+Description     delete a book from publications
+Access          PUBLIC        
+Parameter       pubId, isbn
+Method          DELETE
+*/
+
+Libra.delete("/publication/delete/book/:pubId/:isbn", (req, res) => {
+	
+	//Update publication database
+	database.publications.forEach((publication) => {
+		if (publication.id === parseInt(req.params.pubId)) {
+			const newBookList = publication.books.filter(
+				(book) => book !== req.params.isbn
+			);
+			publication.books = newBookList;
+		}
+	});
+
+	//Update book database
+	database.books.forEach((book) => {
+		if (book.ISBN === req.params.isbn) {
+			book.publication = 0; // no publications available
+			return;
+		}
+	});
+
+	return res.json({
+		publications: database.publications,
+		books: database.books,
+		message: "book was deleted⛔",
+	})
 });
 
 Libra.listen(3000, () => console.log("The server is running🚀"));
