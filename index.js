@@ -1,4 +1,8 @@
+require("dotenv").config();
+
+// Framework
 const express = require("express");
+const mongoose = require("mongoose");
 
 // Database
 const database = require("./database");
@@ -8,6 +12,13 @@ const Libra = express();
 
 // Configuration
 Libra.use(express.json());
+
+// Establish database connection
+mongoose
+	.connect(
+		process.env.MONGO_URL,
+	)
+	.then(() => console.log("connection established🚀"));
 
 /*
 Route           /          
@@ -456,7 +467,6 @@ Method          DELETE
 */
 
 Libra.delete("/publication/delete/book/:pubId/:isbn", (req, res) => {
-	
 	//Update publication database
 	database.publications.forEach((publication) => {
 		if (publication.id === parseInt(req.params.pubId)) {
@@ -479,7 +489,7 @@ Libra.delete("/publication/delete/book/:pubId/:isbn", (req, res) => {
 		publications: database.publications,
 		books: database.books,
 		message: "book was deleted⛔",
-	})
+	});
 });
 
 Libra.listen(3000, () => console.log("The server is running🚀"));
