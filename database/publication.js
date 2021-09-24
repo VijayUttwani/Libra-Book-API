@@ -1,7 +1,5 @@
-const { mongoose } = require("mongoose");
-
 // Framework
-const mongoose = require(mongoose);
+const mongoose = require("mongoose");
 
 // Creating Publication Schema
 const PublicationSchema = mongoose.Schema({
@@ -11,6 +9,6 @@ const PublicationSchema = mongoose.Schema({
 });
 
 // Creating Publication Model
-const PublicationModel = mongoose.model(PublicationSchema);
+const PublicationModel = mongoose.model("publications", PublicationSchema);
 
 module.exports = PublicationModel;

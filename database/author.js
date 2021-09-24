@@ -1,5 +1,5 @@
 // Framework
-const mongoose = require(mongoose);
+const mongoose = require("mongoose");
 
 // Creating Author Schema
 
@@ -10,6 +10,6 @@ const AuthorSchema = mongoose.Schema({
 });
 
 // Creating Author Model
-const AuthorModel = mongoose.model(AuthorSchema);
+const AuthorModel = mongoose.model("authors", AuthorSchema);
 
 module.exports = AuthorModel;
