@@ -5,6 +5,8 @@ const Router = require("express").Router();
 
 // Database Models
 const AuthorModel = require("../../database/author");
+const PublicationModel = require("../../database/publication");
+const BookModel = require("../../database/book");
 // Relative Paths
 
 /*
@@ -77,14 +79,18 @@ Method          POST
 */
 
 Router.post("/new", async (req, res) => {
-	const { newAuthor } = req.body;
+	try {
+		const { newAuthor } = req.body;
 
-	AuthorModel.create(newAuthor);
+		await AuthorModel.create(newAuthor);
 
-	return res.json({
-		authors: newAuthor,
-		message: "author was added🚀",
-	});
+		return res.json({
+			authors: newAuthor,
+			message: "author was added🚀",
+		});
+	} catch (error) {
+		return res.json({ error: error.message });
+	}
 });
 
 /*
@@ -96,22 +102,26 @@ Method          PUT
 */
 
 Router.put("/update/name/:authorId", async (req, res) => {
-	const updatedAuthorDatabase = await AuthorModel.findOneAndUpdate(
-		{
-			id: req.params.authorId,
-		},
-		{
-			name: req.body.newAuthorName,
-		},
-		{
-			new: true,
-		}
-	);
+	try {
+		const updatedAuthorDatabase = await AuthorModel.findOneAndUpdate(
+			{
+				id: req.params.authorId,
+			},
+			{
+				name: req.body.newAuthorName,
+			},
+			{
+				new: true,
+			}
+		);
 
-	return res.json({
-		authors: updatedAuthorDatabase,
-		messsage: "Author name was updated✅",
-	});
+		return res.json({
+			authors: updatedAuthorDatabase,
+			messsage: "Author name was updated✅",
+		});
+	} catch (error) {
+		return res.json({ error: error.message });
+	}
 });
 
 /*

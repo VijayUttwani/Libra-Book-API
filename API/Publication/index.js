@@ -5,6 +5,8 @@ const Router = require("express").Router();
 
 // Database Models
 const PublicationModel = require("../../database/publication");
+const BookModel = require("../../database/book");
+const AuthorModel = require("../../database/author");
 
 /*
 Route           /publication          
@@ -73,14 +75,18 @@ Method          POST
 */
 
 Router.post("/new", async (req, res) => {
-	const { newPublication } = req.body;
+	try {
+		const { newPublication } = req.body;
 
-	PublicationModel.create(newPublication);
+		await PublicationModel.create(newPublication);
 
-	return res.json({
-		publications: newPublication,
-		message: "publication was added🚀",
-	});
+		return res.json({
+			publications: newPublication,
+			message: "publication was added🚀",
+		});
+	} catch (error) {
+		return res.json({ error: error.message });
+	}
 });
 
 /*
@@ -92,22 +98,26 @@ Method          PUT
 */
 
 Router.put("/update/name/:pubId", async (req, res) => {
-	const updatedPublicationDatabase = await PublicationModel.findOneAndUpdate(
-		{
-			id: parseInt(req.params.pubId),
-		},
-		{
-			name: req.body.newPublicationName,
-		},
-		{
-			new: true,
-		}
-	);
+	try {
+		const updatedPublicationDatabase = await PublicationModel.findOneAndUpdate(
+			{
+				id: parseInt(req.params.pubId),
+			},
+			{
+				name: req.body.newPublicationName,
+			},
+			{
+				new: true,
+			}
+		);
 
-	return res.json({
-		publications: updatedPublicationDatabase,
-		message: "Publication name was updated✅",
-	});
+		return res.json({
+			publications: updatedPublicationDatabase,
+			message: "Publication name was updated✅",
+		});
+	} catch (error) {
+		return res.json({ error: error.message });
+	}
 });
 
 /*
@@ -119,44 +129,40 @@ Method          PUT, push
 */
 
 Router.put("/update/book/:pubId/:isbn", async (req, res) => {
-	//update publication database
-	const updatedPublicationDatabase = await PublicationModel.findOneAndUpdate(
-		{
-			id: req.params.pubId,
-		},
-		{
-			$addToSet: {
-				books: req.params.isbn,
+		//update publication database
+		const updatedPublicationDatabase = await PublicationModel.findOneAndUpdate(
+			{
+				id: parseInt(req.params.pubId),
 			},
-		},
-		{
-			new: true,
-		}
-	);
-
-	//update book database
-	const updatedBookDatabase = await BookModel.findOneAndUpdate(
-		{
-			ISBN: req.params.isbn,
-		},
-		{
-			$addToSet: {
-				author: req.params.pubId,
+			{
+				$addToSet: {
+					books: req.params.isbn,
+				},
 			},
-		},
-		{
-			new: true,
-		}
-	);
+			{
+				new: true,
+			}
+		);
 
-	return res.json({
-		books: updatedBookDatabase,
-		publications: updatedPublicationDatabase,
-		message: "Successfully updated publication✅",
-	});
+		//update book database
+		const updatedBookDatabase = await BookModel.findOneAndUpdate(
+			{
+				ISBN: req.params.isbn,
+			},
+			{
+				publication: req.params.pubId
+			},
+			{
+				new: true,
+			}
+		);
+
+		return res.json({
+			books: updatedBookDatabase,
+			publications: updatedPublicationDatabase,
+			message: "Successfully updated publication✅",
+		});
 });
-
-
 
 /*
 Route           /publication/delete       

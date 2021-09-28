@@ -5,6 +5,8 @@ const Router = require("express").Router();
 
 // Database Models
 const BookModel = require("../../database/book");
+const AuthorModel = require("../../database/author");
+const PublicationModel = require("../../database/publication");
 
 /*
 Route           /          
@@ -41,7 +43,7 @@ Router.get("/isbn/:isbn", async (req, res) => {
 });
 
 /*
-Route           /c         
+Route           book/category       
 Description     Get all books by category    
 Access          PUBLIC        
 Parameter       category
@@ -63,7 +65,7 @@ Router.get("/category/:category", async (req, res) => {
 });
 
 /*
-Route           /l        
+Route           book/language      
 Description     Get all books by language  
 Access          PUBLIC        
 Parameter       language
@@ -93,14 +95,18 @@ Method          POST
 */
 
 Router.post("/new", async (req, res) => {
-	const { newBook } = req.body;
+	try {
+		const { newBook } = req.body;
 
-	BookModel.create(newBook);
+		await BookModel.create(newBook);
 
-	return res.json({
-		books: newBook,
-		message: "book was added🚀",
-	});
+		return res.json({
+			books: newBook,
+			message: "book was added🚀",
+		});
+	} catch (error) {
+		return res.json({ error: error.message });
+	}
 });
 
 /*
@@ -112,22 +118,26 @@ Method          PUT
 */
 
 Router.put("/update/title/:isbn", async (req, res) => {
-	const updatedBookDatabase = await BookModel.findOneAndUpdate(
-		{
-			ISBN: req.params.isbn,
-		},
-		{
-			title: req.body.newBookTitle,
-		},
-		{
-			new: true,
-		}
-	);
+	try {
+		const updatedBookDatabase = await BookModel.findOneAndUpdate(
+			{
+				ISBN: req.params.isbn,
+			},
+			{
+				title: req.body.newBookTitle,
+			},
+			{
+				new: true,
+			}
+		);
 
-	return res.json({
-		books: updatedBookDatabase,
-		message: "Book title was updated✅",
-	});
+		return res.json({
+			books: updatedBookDatabase,
+			message: "Book title was updated✅",
+		});
+	} catch (error) {
+		return res.json({ error: error.message });
+	}
 });
 
 /*
@@ -139,41 +149,41 @@ Method          PUT, push
 */
 
 Router.put("/update/author/:isbn/:authorId", async (req, res) => {
-	//update book database
-	const updatedBookDatabase = await BookModel.findOneAndUpdate(
-		{
-			ISBN: req.params.isbn,
-		},
-		{
-			$addToSet: {
-				author: parseInt(req.params.authorId),
+		//update book database
+		const updatedBookDatabase = await BookModel.findOneAndUpdate(
+			{
+				ISBN: req.params.isbn,
 			},
-		},
-		{
-			new: true,
-		}
-	);
-
-	//update author database
-	const updatedAuthorDatabase = await AuthorModel.findOneAndUpdate(
-		{
-			id: req.params.authorId,
-		},
-		{
-			$addToSet: {
-				books: req.params.isbn,
+			{
+				$addToSet: {
+					author: parseInt(req.params.authorId),
+				},
 			},
-		},
-		{
-			new: true,
-		}
-	);
+			{
+				new: true,
+			}
+		);
 
-	return res.json({
-		books: updatedBookDatabase,
-		authors: updatedAuthorDatabase,
-		message: "Book author was updated✅",
-	});
+		//update author database
+		const updatedAuthorDatabase = await AuthorModel.findOneAndUpdate(
+			{
+				id: parseInt(req.params.authorId),
+			},
+			{
+				$addToSet: {
+					books: req.params.isbn,
+				},
+			},
+			{
+				new: true,
+			}
+		);
+
+		return res.json({
+			books: updatedBookDatabase,
+			authors: updatedAuthorDatabase,
+			message: "Book author was updated✅",
+		});
 });
 
 /*

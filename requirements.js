@@ -66,3 +66,5 @@
 // DELETE
 // Delete a publication ✅📌
 // Delete a book from publication ✅📌
+
+// Add mongoose validaton to all the Models
